@@ -8,12 +8,6 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 
-/**
- * author : huangdongliang
- * e-mail : huangdl@flatincbr.com
- * time   : 2022/8/8
- * desc   :
- */
 class CustomView : View {
 
     // 设置画笔

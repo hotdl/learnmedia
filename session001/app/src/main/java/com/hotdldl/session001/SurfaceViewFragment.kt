@@ -1,7 +1,6 @@
 package com.hotdldl.session001
 
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.graphics.Paint
 import android.os.Bundle
 import android.view.*
