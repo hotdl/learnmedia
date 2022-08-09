@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     private var audioRecord: AudioRecord? = null
     var recordThread: Thread? = null
     var recordSignal: AtomicBoolean = AtomicBoolean(true)
+    var pcmFile: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +58,8 @@ class MainActivity : AppCompatActivity() {
                     override fun onGranted(permissions: MutableList<String>, all: Boolean) {
                         if (all) {
                             if (initAudioRecord()) {
+                                genPcmFile()
+                                tvLog?.text = "正在录音。。。"
                                 // 开始录音
                                 audioRecord!!.startRecording()
                                 recordThread?.interrupt()
@@ -79,10 +82,14 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btn_stop)?.setOnClickListener {
             if (audioRecord == null) return@setOnClickListener
+            pcmFile?.let {
+                tvLog?.text = "录音结束，文件：${it.absolutePath}"
+            }
             recordSignal.set(false)
             destroyAudioRecord()
             recordThread?.interrupt()
             recordThread = null
+            pcmFile = null
         }
     }
 
@@ -102,6 +109,18 @@ class MainActivity : AppCompatActivity() {
         return audioRecord!!.state == AudioRecord.STATE_INITIALIZED
     }
 
+    private fun genPcmFile() {
+        // 录音文件存储区域
+        val storeArea = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+        // 录音文件存储目录
+        val pcmDir = File("${storeArea.absolutePath}/session002")
+        if (!pcmDir.exists()) {
+            pcmDir.mkdirs()
+        }
+        // 录音文件
+        pcmFile = File("${pcmDir.absolutePath}/recording_${System.currentTimeMillis()}.pcm")
+    }
+
     private fun destroyAudioRecord() {
         audioRecord?.let {
             // 停止录音
@@ -119,15 +138,6 @@ class MainActivity : AppCompatActivity() {
 
     inner class RecordingRunnable : Runnable {
         override fun run() {
-            // 录音文件存储区域
-            val storeArea = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
-            // 录音文件存储目录
-            val pcmDir = File("${storeArea.absolutePath}/session002")
-            if (!pcmDir.exists()) {
-                pcmDir.mkdirs()
-            }
-            // 录音文件
-            val pcmFile = File("${pcmDir.absolutePath}/recording_${System.currentTimeMillis()}.pcm")
             var outStream: FileOutputStream? = null
             try {
                 outStream = FileOutputStream(pcmFile)
