@@ -28,10 +28,10 @@ class MainActivity : AppCompatActivity() {
         // 采样率，44100Hz是目前唯一能保证在所有设备上都正常工作的采样率
         private const val SAMPLE_RATE_IN_HZ = 44100
 
-        // 音频频道（单通道/立体声）
+        // 声道（单通道/立体声）
         private const val CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO
 
-        // 音频格式
+        // 采样位数
         private const val AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT
 
         // AudioRecord实例支持的最小Buffer尺寸
