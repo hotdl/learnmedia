@@ -63,20 +63,24 @@ class AudioTrackController {
 
     private fun createAudioTrack(mode: Int, bufferSize: Int) {
         val audioAttributes = AudioAttributes.Builder()
+            // 除非您的应用是闹钟，否则您应播放使用情况为 AudioAttributes.USAGE_MEDIA 的音频。
             .setUsage(AudioAttributes.USAGE_MEDIA)
             .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
             .build()
         val audioFormat = AudioFormat.Builder()
+            // 采样率，要保持跟AudioRecord一致
             .setSampleRate(AudioConstants.SAMPLE_RATE_IN_HZ)
+            // 采样位数，要保持跟AudioRecord一致
             .setEncoding(AudioConstants.AUDIO_FORMAT)
+            // 声道，要保持跟AudioRecord对应（注意channel有in/out之分）
             .setChannelMask(AudioConstants.CHANNEL_OUT_CONFIG)
             .build()
         audioTrack = AudioTrack(
             audioAttributes,
             audioFormat,
-            bufferSize,
-            mode,
-            AudioManager.AUDIO_SESSION_ID_GENERATE
+            bufferSize, // static模式下bufferSize为音频数据大小，stream模式下为不能小于AudioTrack.getMinBufferSize
+            mode, // MODE_STATIC或者MODE_STREAM
+            AudioManager.AUDIO_SESSION_ID_GENERATE // 这里简单自动生成sessionId即可
         )
     }
 
@@ -113,7 +117,8 @@ class AudioTrackController {
                 audioTrack?.let {
                     onStart()
                     it.write(audioData, 0, audioData.size)
-                    it.notificationMarkerPosition = audioData.size / 2
+                    val frameSize = 16 / 8 // pcm16，单通道
+                    it.notificationMarkerPosition = audioData.size / frameSize
                     it.setPlaybackPositionUpdateListener(object : AudioTrack.OnPlaybackPositionUpdateListener {
                         override fun onMarkerReached(track: AudioTrack?) {
                             onStop(true)
